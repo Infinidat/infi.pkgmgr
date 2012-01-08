@@ -1,11 +1,26 @@
 from . import UbuntuPackageManager, RedHatPackageManager
 from infi import unittest
 
-from infi.vendata.powertools.utils import get_distribution, get_platform_name
 from infi.run_as_root import RootPermissions
 from infi.pyutils.contexts import contextmanager
 
 #pylint: disable-all
+
+
+def get_platform_name(): # pragma: no cover
+    from platform import system
+    name = system().lower().replace('-', '_')
+    return name
+
+def get_distribution(): # pragma: no cover
+    """:returns: bunch with the following keys: distname, version, id
+    """
+    from bunch import Bunch
+    from platform import linux_distribution
+    distname, version, _id = linux_distribution()
+    # distname in ['Red Hat Enterprise Linux Server', 'Ubuntu']
+    distname = ''.join(distname.split()[:2]).lower()
+    return Bunch(distname=distname, version=version, id=_id.lower())
 
 class TestOnUbuntu(unittest.TestCase):
     def _running_on_ubuntu(self):
