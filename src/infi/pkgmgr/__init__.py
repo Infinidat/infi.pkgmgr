@@ -1,7 +1,21 @@
 __import__("pkg_resources").declare_namespace(__name__)
 
 from infi.pyutils.lazy import cached_method, cached_function, clear_cache
-from infi.vendata.powertools.utils import execute_command
+
+import logging # pylint: disable=W0403
+logger = logging.getLogger()
+
+def execute_command(cmd, check_returncode=True): # pragma: no cover
+    from infi.execute import execute
+    logger.info("executing {}".format(cmd))
+    process = execute(cmd)
+    process.wait()
+    logger.info("execution returned {}".format(process.get_returncode()))
+    logger.debug("stdout: {}".format(process.get_stdout()))
+    logger.debug("stderr: {}".format(process.get_stderr()))
+    if check_returncode and process.get_returncode() != 0:
+        raise RuntimeError("execution of {} failed. see log file for more details".format(cmd))
+    return process
 
 class PackageManager(object): # pylint: disable=R0922
     def install_package(self, package_name):
