@@ -2,7 +2,7 @@ from . import UbuntuPackageManager, RedHatPackageManager
 from infi import unittest
 
 from infi.vendata.powertools.utils import get_distribution, get_platform_name
-from infi.vendata.powertools.external.run_as_root import RootPermissions
+from infi.run_as_root import RootPermissions
 from infi.pyutils.contexts import contextmanager
 
 #pylint: disable-all
