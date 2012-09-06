@@ -7,8 +7,11 @@ logger = logging.getLogger()
 
 def execute_command(cmd, check_returncode=True): # pragma: no cover
     from infi.execute import execute
+    from os import environ
     logger.info("executing {}".format(cmd))
-    process = execute(cmd)
+    env = environ.copy()
+    env.pop('PYTHONPATH', 1)
+    process = execute(cmd, env=env)
     process.wait()
     logger.info("execution returned {}".format(process.get_returncode()))
     logger.debug("stdout: {}".format(process.get_stdout()))
