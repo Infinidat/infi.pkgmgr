@@ -98,7 +98,7 @@ class Output(object):
     def get_returncode(self):
         return self._returncode
 
-    def wait(self):
+    def wait(self, timeout=None):
         pass
 
 class TestUbuntuMock(TestOnUbuntu):
