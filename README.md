@@ -3,7 +3,7 @@ Overview
 
 A simple wrapper for some Linux package managers.
 The distributions currently supported are:
-* Ubutnu (via apt-get)
+* Ubuntu (via apt-get)
 * Redhat (via yum)
 
 Usage
