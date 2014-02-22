@@ -40,3 +40,4 @@ bootstrap.py
 
 src/infi/pkgmgr/__version__.py
 .cache
+eggs
