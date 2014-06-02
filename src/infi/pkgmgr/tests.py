@@ -148,19 +148,10 @@ class TestRedHatMock(TestOnRedHat):
     def _should_skip(self):
         pass
 
-    def _yum_info(self):
+    def _rpm_query(self):
         from textwrap import dedent
-        return Output(stdout=dedent("""
-                                    Installed Packages
-                                    Name       : sg3_utils
-                                    Arch       : x86_64
-                                    Version    : 1.25
-                                    Release    : 5.el5
-                                    Size       : 1.1 M
-                                    Repo       : {}
-                                    Summary    : Utils for Linux's SCSI generic driver devices + raw devices
-                                    URL        : http://sg.danny.cz/sg/sg3_utils.html
-                                    """.format("installed" if self._installed else "kickstart")))
+        return Output(stdout='sg3_utils-1.25-5.el5' if self._installed else 'package sg3_utils is not installed',
+                      returncode=0 if self._installed else 1)
 
     def _yum_install(self):
         self._installed = True
@@ -171,8 +162,8 @@ class TestRedHatMock(TestOnRedHat):
         with patch("infi.execute.execute") as execute:
             def side_effect(*args, **kwargs):
                 command = args[0]
-                if "info" in command:
-                    return self._yum_info()
+                if "-q" in command:
+                    return self._rpm_query()
                 elif "install" in command:
                     return self._yum_install()
                 raise NotImplementedError()
