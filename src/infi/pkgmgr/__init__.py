@@ -62,17 +62,13 @@ class RedHatPackageManager(PackageManager):
         execute_command(cmd, timeout=INSTALL_TIME)
 
     def is_package_installed(self, package_name):
-        cmd = "yum info {}".format(package_name).split()
-        info = execute_command(cmd, timeout=QUERY_TIME)
-        return self._extract_repo_name_from_info(info.get_stdout()) == "installed"
-
-    def _extract_repo_name_from_info(self, string):
-        import re
-        pattern = "^Repo\s+: (?P<repo>[A-Za-z0-9_-]+)$"
-        match = re.search(pattern, string, re.MULTILINE)
-        if match is None:
-            return ''
-        return match.groupdict()['repo']
+        cmd = "rpm -q {}".format(package_name).split()
+        info = execute_command(cmd, timeout=QUERY_TIME, check_returncode=False)
+        if info.get_returncode() == 0 and 'not installed' not in info.get_stdout():
+            return True
+        if info.get_returncode() == 1 and 'package {} is not installed'.format(package_name) in info.get_stdout():
+            return False
+        raise RuntimeError("rpm -q returned unexpected results, see the log")
 
     def remove_package(self, package_name):
         cmd = "yum remove -y {}".format(package_name).split()
