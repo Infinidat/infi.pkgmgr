@@ -89,5 +89,5 @@ class SusePackageManager(PackageManager):
         raise RuntimeError("rpm -q returned unexpected results, see the log")
 
     def remove_package(self, package_name):
-        cmd = "zypper --non-interactive --no-gpg-checks install {}".format(package_name).split()
+        cmd = "zypper --non-interactive --no-gpg-checks remove {}".format(package_name).split()
         execute_command(cmd, timeout=INSTALL_TIME)
