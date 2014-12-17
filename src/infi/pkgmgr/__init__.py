@@ -89,5 +89,23 @@ class SusePackageManager(PackageManager):
         raise RuntimeError("rpm -q returned unexpected results, see the log")
 
     def remove_package(self, package_name):
-        cmd = "zypper --non-interactive --no-gpg-checks install {}".format(package_name).split()
+        cmd = "zypper --non-interactive --no-gpg-checks remove {}".format(package_name).split()
         execute_command(cmd, timeout=INSTALL_TIME)
+
+class SolarisPackageManager(PackageManager):
+    def install_package(self, package_name):
+        # There is no unified package repository for solaris
+        raise NotImplementedError
+
+    def is_package_installed(self, package_name):
+        cmd = "pkginfo {}".format(package_name).split()
+        info = execute_command(cmd, timeout=QUERY_TIME, check_returncode=False)
+        if info.get_returncode() == 0 and 'not found' not in info.get_stderr():
+            return True
+        elif info.get_returncode() == 1 and 'ERROR: information for "{}" was not found'.format(package_name) in info.get_stderr():
+            return False
+        else:
+            raise RuntimeError("pkginfo returned unexpected results, see the log")
+
+    def remove_package(self, package_name):
+        raise NotImplementedError
