@@ -24,6 +24,7 @@ def execute_command(cmd, check_returncode=True, timeout=WAIT_TIME): # pragma: no
         raise RuntimeError("execution of {} failed. see log file for more details".format(cmd))
     return process
 
+
 class PackageManager(object): # pylint: disable=R0922
     def install_package(self, package_name):
         raise NotImplementedError() # pragma: no cover
@@ -33,6 +34,7 @@ class PackageManager(object): # pylint: disable=R0922
 
     def remove_package(self, package_name):
         raise NotImplementedError() # pragma: no cover
+
 
 class UbuntuPackageManager(PackageManager):
     def install_package(self, package_name):
@@ -56,6 +58,7 @@ class UbuntuPackageManager(PackageManager):
         cmd = "apt-get remove -y {}".format(package_name).split()
         execute_command(cmd, timeout=INSTALL_TIME)
 
+
 class RedHatPackageManager(PackageManager):
     def install_package(self, package_name):
         cmd = "yum install -y {}".format(package_name).split()
@@ -74,9 +77,14 @@ class RedHatPackageManager(PackageManager):
         cmd = "yum remove -y {}".format(package_name).split()
         execute_command(cmd, timeout=INSTALL_TIME)
 
+
 class SusePackageManager(PackageManager):
     def install_package(self, package_name):
         cmd = "zypper --non-interactive --no-gpg-checks install --auto-agree-with-licenses {}".format(package_name).split()
+        execute_command(cmd, timeout=INSTALL_TIME)
+
+    def upgrade_package(self, package_name):
+        cmd = "zypper --non-interactive --no-gpg-checks update --auto-agree-with-licenses {}".format(package_name).split()
         execute_command(cmd, timeout=INSTALL_TIME)
 
     def is_package_installed(self, package_name):
@@ -91,6 +99,16 @@ class SusePackageManager(PackageManager):
     def remove_package(self, package_name):
         cmd = "zypper --non-interactive --no-gpg-checks remove {}".format(package_name).split()
         execute_command(cmd, timeout=INSTALL_TIME)
+
+    def get_installed_version(self, package_name):
+        import re
+        cmd = "zypper --non-interactive --no-gpg-checks info {}".format(package_name).split()
+        proccess = execute_command(cmd, timeout=INSTALL_TIME)
+        match = re.search("Version:\s*(\S+)", proccess.get_stdout())
+        if match is None:
+            raise RuntimeError("Couldn't get package version")
+        return match.group(1)
+
 
 class SolarisPackageManager(PackageManager):
     def install_package(self, package_name):
