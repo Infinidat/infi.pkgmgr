@@ -1,9 +1,10 @@
-from . import UbuntuPackageManager, RedHatPackageManager
+from . import UbuntuPackageManager, RedHatPackageManager, SolarisPackageManager, RpmMixin
 from infi import unittest
 
 from infi.run_as_root import RootPermissions
 from infi.pyutils.contexts import contextmanager
 
+from infi import pkgmgr
 #pylint: disable-all
 
 
@@ -180,3 +181,49 @@ class TestRedHatMock(TestOnRedHat):
 
     def _is_package_seems_to_be_installed(self, package_name, executable_name):
         return self._installed
+
+class test_package_versioning(unittest.TestCase):
+
+    Solaris_v1 = """   VERSION:  6.0.100.000,REV=08.01.2012.09.00"""
+    Solaris_v2 = """   VERSION:  5.14.2.5"""
+    Ubuntu_v1 = """Version: 0.4.9-3ubuntu7.2"""
+    Ubuntu_v2 = """Version: 1:1.2.8.dfsg-1ubuntu1"""
+    rpm_v1 = """4.8-7.el7"""
+    rpm_v2 = """18.168.6.1-34.el7"""
+    def test_solaris_versioning_v1(self):
+        with patch.object(pkgmgr , 'execute_command') as patched:
+            patched().get_stdout.return_value = self.Solaris_v1
+            result = SolarisPackageManager().get_installed_version(self.Solaris_v1)
+            self.assertEqual(result,{'version':'6.0.100.000', 'revision':'08.01.2012.09.00'})
+
+    def test_solaris_versioning_v2(self):
+        with patch.object(pkgmgr , 'execute_command') as patched:
+            patched().get_stdout.return_value = self.Solaris_v2
+            result = SolarisPackageManager().get_installed_version(self.Solaris_v2)
+            self.assertEqual(result,{'version':'5.14.2.5'})
+
+    def test_ubuntu_versioning_v1(self):
+        with patch.object(pkgmgr , 'execute_command') as patched:
+            patched().get_stdout.return_value = self.Ubuntu_v1
+            result = UbuntuPackageManager().get_installed_version(self.Ubuntu_v1)
+            self.assertEqual(result,{'version':'0.4.9-3ubuntu7.2'})
+
+    def test_ubuntu_versioning_v2(self):
+        with patch.object(pkgmgr , 'execute_command') as patched:
+            patched().get_stdout.return_value = self.Ubuntu_v2
+            result = UbuntuPackageManager().get_installed_version(self.Ubuntu_v2)
+            self.assertEqual(result,{'version':'1:1.2.8.dfsg-1ubuntu1'})
+
+    def test_rpm_versioning_v1(self):
+        with patch.object(pkgmgr , 'execute_command') as patched:
+            patched().get_stdout.return_value = self.rpm_v1
+            patched().get_returncode.return_value = 0
+            result = RpmMixin().get_installed_version(self.rpm_v1)
+            self.assertEqual(result,{'version':'4.8-7.el7'})
+
+    def test_rpm_versioning_v2(self):
+        with patch.object(pkgmgr , 'execute_command') as patched:
+            patched().get_stdout.return_value = self.rpm_v2
+            patched().get_returncode.return_value = 0
+            result = RpmMixin().get_installed_version(self.rpm_v2)
+            self.assertEqual(result,{'version':'18.168.6.1-34.el7'})
