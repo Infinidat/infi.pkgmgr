@@ -50,7 +50,7 @@ class RpmMixin(object):
         raise RuntimeError("rpm -q returned unexpected results, see the log")
 
     def get_installed_version(self, package_name):
-        cmd = "rpm -q {} --queryformat=%{{version}}-%{{release}}".format(package_name.split())
+        cmd = "rpm -q {rpm_name} --queryformat='%{{version}}-%{{release}}'".format(rpm_name=package_name).split()
         info = execute_command(cmd, timeout=QUERY_TIME, check_returncode=False)
         if info.get_returncode() == 0 and 'not installed' not in info.get_stdout():
             return {'version':info.get_stdout().strip()}
