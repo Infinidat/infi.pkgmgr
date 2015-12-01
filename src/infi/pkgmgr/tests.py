@@ -227,3 +227,15 @@ class test_package_versioning(unittest.TestCase):
             patched().get_returncode.return_value = 0
             result = RpmMixin().get_installed_version(self.rpm_v2)
             self.assertEqual(result,{'version':'18.168.6.1-34.el7'})
+
+class GeneralTest(unittest.TestCase):
+    def _is_solaris(self):
+        from infi.os_info import get_platform_string
+        return get_platform_string().split('-')[0] == 'solaris'
+
+    def test_get_package_manager(self):
+        package_manager = pkgmgr.get_package_manager()
+        package_to_check = 'python'
+        if self._is_solaris():
+            package_to_check = 'CSW' + package_to_check
+        self.assertTrue(package_manager.is_package_installed(package_to_check))

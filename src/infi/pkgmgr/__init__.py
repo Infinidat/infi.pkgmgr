@@ -150,3 +150,22 @@ class SolarisPackageManager(PackageManager):
 
     def remove_package(self, package_name):
         raise NotImplementedError
+
+
+def get_package_manager():
+    from infi.os_info import get_platform_string
+    platform_name = get_platform_string().split("-")[0]
+    if platform_name == 'linux':
+        # get distribution
+        platform_name = get_platform_string().split("-")[1]
+    pkgmgr_dict = {
+        'ubuntu': UbuntuPackageManager,
+        'redhat': RedHatPackageManager,
+        'centos': RedHatPackageManager,
+        'suse': SusePackageManager,
+        'solaris': SolarisPackageManager
+    }
+    if platform_name in pkgmgr_dict:
+        return pkgmgr_dict.get(platform_name)()
+    else:
+        raise RuntimeError("Package Manager is not implemented for {}".format(platform_name))
