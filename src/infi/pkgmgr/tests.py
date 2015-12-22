@@ -52,6 +52,11 @@ class TestOnUbuntu(unittest.TestCase):
         from os.path import exists
         return exists(executable_name)
 
+    def test_check_unknown_package(self):
+        pkgmgr = UbuntuPackageManager()
+        self.assertFalse(pkgmgr.is_package_installed('blablabla9988ok'))
+
+
 class TestOnRedHat(unittest.TestCase):
     def _running_on_ubuntu(self):
         return get_platform_name() == "linux" and get_distribution().distname == "redhat"

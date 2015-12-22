@@ -64,7 +64,9 @@ class UbuntuPackageManager(PackageManager):
 
     def is_package_installed(self, package_name):
         cmd = "aptitude show {}".format(package_name).split()
-        aptitude = execute_command(cmd, timeout=QUERY_TIME)
+        aptitude = execute_command(cmd, check_returncode=False, timeout=QUERY_TIME)
+        if aptitude.get_returncode() != 0:
+            return False
         return self._extract_state_from_aptitude_search_output(aptitude.get_stdout()) == "installed"
 
     def _extract_state_from_aptitude_search_output(self, string):
