@@ -142,7 +142,10 @@ class TestUbuntuMock(TestOnUbuntu):
     def test_sg3_utils(self):
         with self._apply_patches():
             super(TestUbuntuMock, self).test_sg3_utils()
-        pass
+
+    def test_check_unknown_package(self):
+        with self._apply_patches():
+            super(TestUbuntuMock, self).test_check_unknown_package()
 
     def setUp(self):
         self._installed = False
