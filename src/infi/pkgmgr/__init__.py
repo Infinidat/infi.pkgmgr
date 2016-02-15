@@ -58,13 +58,17 @@ class RpmMixin(object):
 
 
 class UbuntuPackageManager(PackageManager):
-    def install_package(self, package_name):
-        cmd = "apt-get install -y {}".format(package_name).split()
-        execute_command(cmd, timeout=INSTALL_TIME)
+    def install_package(self, package_name, specific_version=None):
+        cmd = "apt-get install -y {}".format(package_name)
+        if specific_version:
+            cmd += "={} --force-yes".format(specific_version)
+        execute_command(cmd.split(), timeout=INSTALL_TIME)
 
     def is_package_installed(self, package_name):
         cmd = "aptitude show {}".format(package_name).split()
-        aptitude = execute_command(cmd, timeout=QUERY_TIME)
+        aptitude = execute_command(cmd, check_returncode=False, timeout=QUERY_TIME)
+        if aptitude.get_returncode() != 0:
+            return False
         return self._extract_state_from_aptitude_search_output(aptitude.get_stdout()) == "installed"
 
     def _extract_state_from_aptitude_search_output(self, string):
