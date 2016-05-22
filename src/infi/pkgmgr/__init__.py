@@ -73,7 +73,7 @@ class UbuntuPackageManager(PackageManager):
 
     def _extract_state_from_dpkg_query_output(self, string):
         import re
-        pattern = "^ii\s+$"
+        pattern = "^(?P<state>ii)\s+"
         match = re.search(pattern, string, re.MULTILINE)
         if match is None:
             return ''
