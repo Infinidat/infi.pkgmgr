@@ -111,16 +111,33 @@ class TestUbuntuMock(TestOnUbuntu):
     def _should_skip(self):
         pass
 
-    def _aptitude_show(self):
+    def _dpkg_query_s(self):
+        from textwrap import dedent
+        if self._installed:
+            return Output(stdout=dedent("""
+                                        Package: sg3-utils
+                                        Status: installed ok installed
+                                        Priority: optional
+                                        Version: 1.30-1
+                                        Section: admin
+                                        """))
+        else:
+            return Output(stdout=dedent("""
+                                        dpkg-query: package sg3-utils is not installed and no information is available
+                                        Use dpkg --info (= dpkg-deb --info) to examine archive files,
+                                        and dpkg --contents (= dpkg-deb --contents) to list their contents.
+                                        """), returncode=1)
+
+    def _dpkg_query_l(self):
         from textwrap import dedent
         return Output(stdout=dedent("""
-                                    Package: sg3-utils
-                                    State: {}
-                                    Automatically installed: no
-                                    Version: 1.30-1
-                                    Priority: optional
-                                    Section: admin
-                                    """.format("installed" if self._installed else "not installed")))
+                                    Desired=Unknown/Install/Remove/Purge/Hold
+                                    | Status=Not/Inst/Conf-files/Unpacked/halF-conf/Half-inst/trig-aWait/Trig-pend
+                                    |/ Err?=(none)/Reinst-required (Status,Err: uppercase=bad)
+                                    ||/ Name                        Version            Architecture       Description
+                                    +++-===========================-==================-==================-===========================================================
+                                    {}  sg3-utils                   1.30-1             i386               utilities for devices using the SCSI command set
+                                    """.format("ii" if self._installed else "un")))
 
     def _apt_get(self):
         self._installed = True
@@ -131,8 +148,11 @@ class TestUbuntuMock(TestOnUbuntu):
         with patch("infi.execute.execute") as execute:
             def side_effect(*args, **kwargs):
                 command = args[0]
-                if "aptitude" in command:
-                    return self._aptitude_show()
+                if "dpkg-query" in command:
+                    if "-s" in command:
+                        return self._dpkg_query_s()
+                    if "-l" in command:
+                        return self._dpkg_query_l()
                 elif "apt-get" in command:
                     return self._apt_get()
                 raise NotImplementedError()
