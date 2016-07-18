@@ -15,6 +15,7 @@ def execute_command(cmd, check_returncode=True, timeout=WAIT_TIME): # pragma: no
     logger.info("executing {}".format(cmd))
     env = environ.copy()
     env.pop('PYTHONPATH', 1)
+    env['LC_ALL'] = 'en_US.UTF-8'
     process = execute(cmd, env=env)
     process.wait(WAIT_TIME)
     logger.info("execution returned {}".format(process.get_returncode()))
