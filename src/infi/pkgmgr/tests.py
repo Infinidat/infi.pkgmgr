@@ -141,8 +141,11 @@ class TestUbuntuMock(TestOnUbuntu):
                                     {}  sg3-utils                   1.30-1             i386               utilities for devices using the SCSI command set
                                     """.format("ii" if self._installed else "un")))
 
-    def _apt_get(self):
+    def _apt_get_install(self):
         self._installed = True
+        return Output()
+
+    def _apt_get_update(self):
         return Output()
 
     @contextmanager
@@ -155,8 +158,10 @@ class TestUbuntuMock(TestOnUbuntu):
                         return self._dpkg_query_s()
                     if "-l" in command:
                         return self._dpkg_query_l()
-                elif "apt-get" in command:
-                    return self._apt_get()
+                elif "apt-get install" in ' '.join(command):
+                    return self._apt_get_install()
+                elif "apt-get update" in ' '.join(command):
+                    return self._apt_get_update()
                 raise NotImplementedError()
             execute.side_effect = side_effect
             yield
