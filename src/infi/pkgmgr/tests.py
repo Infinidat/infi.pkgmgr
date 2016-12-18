@@ -38,6 +38,8 @@ class TestOnUbuntu(unittest.TestCase):
             raise self.skipTest("This test must run with root permissions")
 
     def test_sg3_utils(self):
+        from infi.execute import execute
+        execute('apt-get update'.split())
         self._check_package("sg3-utils", "/usr/bin/sg_inq")
 
     def _check_package(self, package_name, executable_name):
@@ -139,8 +141,11 @@ class TestUbuntuMock(TestOnUbuntu):
                                     {}  sg3-utils                   1.30-1             i386               utilities for devices using the SCSI command set
                                     """.format("ii" if self._installed else "un")))
 
-    def _apt_get(self):
+    def _apt_get_install(self):
         self._installed = True
+        return Output()
+
+    def _apt_get_update(self):
         return Output()
 
     @contextmanager
@@ -153,8 +158,10 @@ class TestUbuntuMock(TestOnUbuntu):
                         return self._dpkg_query_s()
                     if "-l" in command:
                         return self._dpkg_query_l()
-                elif "apt-get" in command:
-                    return self._apt_get()
+                elif "apt-get install" in ' '.join(command):
+                    return self._apt_get_install()
+                elif "apt-get update" in ' '.join(command):
+                    return self._apt_get_update()
                 raise NotImplementedError()
             execute.side_effect = side_effect
             yield
@@ -221,24 +228,28 @@ class test_package_versioning(unittest.TestCase):
     def test_solaris_versioning_v1(self):
         with patch.object(pkgmgr , 'execute_command') as patched:
             patched().get_stdout.return_value = self.Solaris_v1
+            patched().get_returncode.return_value = 0
             result = SolarisPackageManager().get_installed_version(self.Solaris_v1)
             self.assertEqual(result,{'version':'6.0.100.000', 'revision':'08.01.2012.09.00'})
 
     def test_solaris_versioning_v2(self):
         with patch.object(pkgmgr , 'execute_command') as patched:
             patched().get_stdout.return_value = self.Solaris_v2
+            patched().get_returncode.return_value = 0
             result = SolarisPackageManager().get_installed_version(self.Solaris_v2)
             self.assertEqual(result,{'version':'5.14.2.5'})
 
     def test_ubuntu_versioning_v1(self):
         with patch.object(pkgmgr , 'execute_command') as patched:
             patched().get_stdout.return_value = self.Ubuntu_v1
+            patched().get_returncode.return_value = 0
             result = UbuntuPackageManager().get_installed_version(self.Ubuntu_v1)
             self.assertEqual(result,{'version':'0.4.9-3ubuntu7.2'})
 
     def test_ubuntu_versioning_v2(self):
         with patch.object(pkgmgr , 'execute_command') as patched:
             patched().get_stdout.return_value = self.Ubuntu_v2
+            patched().get_returncode.return_value = 0
             result = UbuntuPackageManager().get_installed_version(self.Ubuntu_v2)
             self.assertEqual(result,{'version':'1:1.2.8.dfsg-1ubuntu1'})
 

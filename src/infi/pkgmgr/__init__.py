@@ -15,6 +15,7 @@ def execute_command(cmd, check_returncode=True, timeout=WAIT_TIME): # pragma: no
     logger.info("executing {}".format(cmd))
     env = environ.copy()
     env.pop('PYTHONPATH', 1)
+    env['LC_ALL'] = 'en_US.UTF-8'
     process = execute(cmd, env=env)
     process.wait(WAIT_TIME)
     logger.info("execution returned {}".format(process.get_returncode()))
@@ -61,6 +62,8 @@ class UbuntuPackageManager(PackageManager):
     def install_package(self, package_name, specific_version=None):
         cmd = "apt-get install -y {}".format(package_name)
         if specific_version:
+            if self.get_installed_version(package_name)['version'] != specific_version:
+                self.remove_package(package_name)
             cmd += "={} --force-yes".format(specific_version)
         execute_command(cmd.split(), timeout=INSTALL_TIME)
 
@@ -79,13 +82,16 @@ class UbuntuPackageManager(PackageManager):
             return ''
         return match.groupdict()['state']
 
-    def _extract_version_from_dpkg_query_output(self, string):
-        import re
-        pattern = "^Version:\s+(?P<version>[a-zA-Z0-9\.\-\_\:]+)$"
-        match = re.search(pattern, string, re.MULTILINE)
-        if match is None:
+    def _extract_version_from_dpkg_query(self, dpkg_query):
+        if dpkg_query.get_returncode() != 0:
             return ''
-        return match.groupdict()['version']
+        else:
+            import re
+            pattern = "^Version:\s+(?P<version>[a-zA-Z0-9\.\-\_\:]+)$"
+            match = re.search(pattern, dpkg_query.get_stdout(), re.MULTILINE)
+            if match is None:
+                return ''
+            return match.groupdict()['version']
 
     def remove_package(self, package_name):
         cmd = "apt-get remove -y {}".format(package_name).split()
@@ -93,8 +99,8 @@ class UbuntuPackageManager(PackageManager):
 
     def get_installed_version(self, package_name):
         cmd = "dpkg-query -s {}".format(package_name).split()
-        dpkg_query = execute_command(cmd, timeout=QUERY_TIME)
-        return {'version':self._extract_version_from_dpkg_query_output(dpkg_query.get_stdout())}
+        dpkg_query = execute_command(cmd, check_returncode=False, timeout=QUERY_TIME)
+        return {'version':self._extract_version_from_dpkg_query(dpkg_query)}
 
 class RedHatPackageManager(RpmMixin, PackageManager):
     def install_package(self, package_name):
