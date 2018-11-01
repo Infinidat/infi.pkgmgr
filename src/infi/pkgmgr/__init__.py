@@ -42,17 +42,19 @@ class RpmMixin(object):
     def is_package_installed(self, package_name):
         cmd = "rpm -q {}".format(package_name).split()
         info = execute_command(cmd, timeout=QUERY_TIME, check_returncode=False)
-        if info.get_returncode() == 0 and 'not installed' not in info.get_stdout():
+        output = info.get_stdout().decode("ascii")
+        if info.get_returncode() == 0 and 'not installed' not in output:
             return True
-        if info.get_returncode() == 1 and 'package {} is not installed'.format(package_name) in info.get_stdout():
+        if info.get_returncode() == 1 and 'package {} is not installed'.format(package_name) in output:
             return False
         raise RuntimeError("rpm -q returned unexpected results, see the log")
 
     def get_installed_version(self, package_name):
         cmd = "rpm -q {rpm_name} --queryformat=%{{version}}-%{{release}}".format(rpm_name=package_name).split()
         info = execute_command(cmd, timeout=QUERY_TIME, check_returncode=False)
-        if info.get_returncode() == 0 and 'not installed' not in info.get_stdout():
-            return {'version': info.get_stdout().strip()}
+        output = info.get_stdout().decode("ascii")
+        if info.get_returncode() == 0 and 'not installed' not in output:
+            return {'version': output.strip()}
         raise RuntimeError("Couldn't get package version")
 
 
@@ -70,7 +72,8 @@ class UbuntuPackageManager(PackageManager):
         dpkg_query = execute_command(cmd, check_returncode=False, timeout=QUERY_TIME)
         if dpkg_query.get_returncode() != 0:
             return False
-        return self._extract_state_from_dpkg_query_output(dpkg_query.get_stdout()) == "ii"
+        output = dpkg_query.get_stdout().decode("ascii")
+        return self._extract_state_from_dpkg_query_output(output) == "ii"
 
     def _extract_state_from_dpkg_query_output(self, string):
         import re
@@ -86,7 +89,8 @@ class UbuntuPackageManager(PackageManager):
         else:
             import re
             pattern = "^Version:\s+(?P<version>[a-zA-Z0-9\.\-\_\:]+)$"
-            match = re.search(pattern, dpkg_query.get_stdout(), re.MULTILINE)
+            output = dpkg_query.get_stdout().decode("ascii")
+            match = re.search(pattern, output, re.MULTILINE)
             if match is None:
                 return ''
             return match.groupdict()['version']
@@ -132,9 +136,10 @@ class SolarisPackageManager(PackageManager):
     def is_package_installed(self, package_name):
         cmd = "pkginfo {}".format(package_name).split()
         info = execute_command(cmd, timeout=QUERY_TIME, check_returncode=False)
-        if info.get_returncode() == 0 and 'not found' not in info.get_stderr():
+        output = info.get_stderr().decode("ascii")
+        if info.get_returncode() == 0 and 'not found' not in output:
             return True
-        elif info.get_returncode() == 1 and 'ERROR: information for "{}" was not found'.format(package_name) in info.get_stderr():
+        elif info.get_returncode() == 1 and 'ERROR: information for "{}" was not found'.format(package_name) in output:
             return False
         else:
             raise RuntimeError("pkginfo returned unexpected results, see the log")
@@ -154,7 +159,8 @@ class SolarisPackageManager(PackageManager):
         """return dict of version and revision ( if exsist ) per pkg"""
         cmd = "pkginfo -l {}".format(package_name).split()
         pkginfo = execute_command(cmd, timeout=QUERY_TIME)
-        return self._extract_version_from_pkginfo_output(pkginfo.get_stdout())
+        output = pkginfo.get_stdout().decode("ascii")
+        return self._extract_version_from_pkginfo_output(output)
 
     def remove_package(self, package_name):
         raise NotImplementedError

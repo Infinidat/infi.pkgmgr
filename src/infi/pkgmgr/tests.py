@@ -121,13 +121,13 @@ class TestUbuntuMock(TestOnUbuntu):
                                         Priority: optional
                                         Version: 1.30-1
                                         Section: admin
-                                        """))
+                                        """).encode("ascii"))
         else:
             return Output(stdout=dedent("""
                                         dpkg-query: package sg3-utils is not installed and no information is available
                                         Use dpkg --info (= dpkg-deb --info) to examine archive files,
                                         and dpkg --contents (= dpkg-deb --contents) to list their contents.
-                                        """), returncode=1)
+                                        """).encode("ascii"), returncode=1)
 
     def _dpkg_query_l(self):
         from textwrap import dedent
@@ -138,7 +138,7 @@ class TestUbuntuMock(TestOnUbuntu):
                                     ||/ Name                        Version            Architecture       Description
                                     +++-===========================-==================-==================-===========================================================
                                     {}  sg3-utils                   1.30-1             i386               utilities for devices using the SCSI command set
-                                    """.format("ii" if self._installed else "un")))
+                                    """.format("ii" if self._installed else "un")).encode("ascii"))
 
     def _apt_get_install(self):
         self._installed = True
@@ -184,7 +184,7 @@ class TestRedHatMock(TestOnRedHat):
         pass
 
     def _rpm_query(self):
-        return Output(stdout='sg3_utils-1.25-5.el5' if self._installed else 'package sg3_utils is not installed',
+        return Output(stdout=b'sg3_utils-1.25-5.el5' if self._installed else b'package sg3_utils is not installed',
                       returncode=0 if self._installed else 1)
 
     def _yum_install(self):
@@ -217,12 +217,12 @@ class TestRedHatMock(TestOnRedHat):
 
 class test_package_versioning(unittest.TestCase):
 
-    Solaris_v1 = """   VERSION:  6.0.100.000,REV=08.01.2012.09.00"""
-    Solaris_v2 = """   VERSION:  5.14.2.5"""
-    Ubuntu_v1 = """Version: 0.4.9-3ubuntu7.2"""
-    Ubuntu_v2 = """Version: 1:1.2.8.dfsg-1ubuntu1"""
-    rpm_v1 = """4.8-7.el7"""
-    rpm_v2 = """18.168.6.1-34.el7"""
+    Solaris_v1 = b"""   VERSION:  6.0.100.000,REV=08.01.2012.09.00"""
+    Solaris_v2 = b"""   VERSION:  5.14.2.5"""
+    Ubuntu_v1 = b"""Version: 0.4.9-3ubuntu7.2"""
+    Ubuntu_v2 = b"""Version: 1:1.2.8.dfsg-1ubuntu1"""
+    rpm_v1 = b"""4.8-7.el7"""
+    rpm_v2 = b"""18.168.6.1-34.el7"""
     def test_solaris_versioning_v1(self):
         with patch.object(pkgmgr, 'execute_command') as patched:
             patched().get_stdout.return_value = self.Solaris_v1
