@@ -5,27 +5,22 @@ A simple wrapper for some Linux package managers.
 The distributions currently supported are:
 * Ubuntu (via apt-get)
 * Redhat (via yum)
+* SUSE (via zypper)
+* Solaris (via pkginfo)
 
 Usage
 -----
 
-On Ubuntu:
+Here is an example usage to install the package `sg3-utils` if it is not
+already installed:
 ```python
-from infi.pkgmgr import UbuntuPackageManager
-pkgmgr = UbuntuPackageManager()
+from infi.pkgmgr import get_package_manager
+pkgmgr = get_package_manager()
 name = 'sg3-utils'
 if not pkgmgr.is_package_installed(name):
     pkgmgr.install_package(name)
 ```
 
-On RedHat:
-```python
-from infi.pkgmgr import RedHatPackageManager
-pkgmgr = RedHatPackageManager()
-name = 'sg3_utils'
-if not pkgmgr.is_package_installed(name):
-    pkgmgr.install_package(name)
-```
 
 Checking out the code
 =====================
