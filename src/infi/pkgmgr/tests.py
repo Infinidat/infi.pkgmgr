@@ -2,18 +2,19 @@ from . import UbuntuPackageManager, RedHatPackageManager, SolarisPackageManager,
 from infi import unittest
 
 from infi.run_as_root import RootPermissions
-from infi.pyutils.contexts import contextmanager
+from contextlib import contextmanager
 
 from infi import pkgmgr
-#pylint: disable-all
+from mock import patch
+# pylint: disable-all
 
 
-def get_platform_name(): # pragma: no cover
+def get_platform_name():  # pragma: no cover
     from platform import system
     name = system().lower().replace('-', '_')
     return name
 
-def get_distribution(): # pragma: no cover
+def get_distribution():  # pragma: no cover
     """:returns: bunch with the following keys: distname, version, id
     """
     from munch import Munch
@@ -87,8 +88,6 @@ class TestOnRedHat(unittest.TestCase):
     def _is_package_seems_to_be_installed(self, package_name, executable_name):
         from os.path import exists
         return exists(executable_name)
-
-from mock import patch
 
 class Output(object):
     def __init__(self, returncode=0, stdout='', stderr=''):
@@ -185,7 +184,6 @@ class TestRedHatMock(TestOnRedHat):
         pass
 
     def _rpm_query(self):
-        from textwrap import dedent
         return Output(stdout='sg3_utils-1.25-5.el5' if self._installed else 'package sg3_utils is not installed',
                       returncode=0 if self._installed else 1)
 
@@ -226,46 +224,46 @@ class test_package_versioning(unittest.TestCase):
     rpm_v1 = """4.8-7.el7"""
     rpm_v2 = """18.168.6.1-34.el7"""
     def test_solaris_versioning_v1(self):
-        with patch.object(pkgmgr , 'execute_command') as patched:
+        with patch.object(pkgmgr, 'execute_command') as patched:
             patched().get_stdout.return_value = self.Solaris_v1
             patched().get_returncode.return_value = 0
             result = SolarisPackageManager().get_installed_version(self.Solaris_v1)
-            self.assertEqual(result,{'version':'6.0.100.000', 'revision':'08.01.2012.09.00'})
+            self.assertEqual(result, {'version': '6.0.100.000', 'revision': '08.01.2012.09.00'})
 
     def test_solaris_versioning_v2(self):
-        with patch.object(pkgmgr , 'execute_command') as patched:
+        with patch.object(pkgmgr, 'execute_command') as patched:
             patched().get_stdout.return_value = self.Solaris_v2
             patched().get_returncode.return_value = 0
             result = SolarisPackageManager().get_installed_version(self.Solaris_v2)
-            self.assertEqual(result,{'version':'5.14.2.5'})
+            self.assertEqual(result, {'version': '5.14.2.5'})
 
     def test_ubuntu_versioning_v1(self):
-        with patch.object(pkgmgr , 'execute_command') as patched:
+        with patch.object(pkgmgr, 'execute_command') as patched:
             patched().get_stdout.return_value = self.Ubuntu_v1
             patched().get_returncode.return_value = 0
             result = UbuntuPackageManager().get_installed_version(self.Ubuntu_v1)
-            self.assertEqual(result,{'version':'0.4.9-3ubuntu7.2'})
+            self.assertEqual(result, {'version': '0.4.9-3ubuntu7.2'})
 
     def test_ubuntu_versioning_v2(self):
-        with patch.object(pkgmgr , 'execute_command') as patched:
+        with patch.object(pkgmgr, 'execute_command') as patched:
             patched().get_stdout.return_value = self.Ubuntu_v2
             patched().get_returncode.return_value = 0
             result = UbuntuPackageManager().get_installed_version(self.Ubuntu_v2)
-            self.assertEqual(result,{'version':'1:1.2.8.dfsg-1ubuntu1'})
+            self.assertEqual(result, {'version': '1:1.2.8.dfsg-1ubuntu1'})
 
     def test_rpm_versioning_v1(self):
-        with patch.object(pkgmgr , 'execute_command') as patched:
+        with patch.object(pkgmgr, 'execute_command') as patched:
             patched().get_stdout.return_value = self.rpm_v1
             patched().get_returncode.return_value = 0
             result = RpmMixin().get_installed_version(self.rpm_v1)
-            self.assertEqual(result,{'version':'4.8-7.el7'})
+            self.assertEqual(result, {'version': '4.8-7.el7'})
 
     def test_rpm_versioning_v2(self):
-        with patch.object(pkgmgr , 'execute_command') as patched:
+        with patch.object(pkgmgr, 'execute_command') as patched:
             patched().get_stdout.return_value = self.rpm_v2
             patched().get_returncode.return_value = 0
             result = RpmMixin().get_installed_version(self.rpm_v2)
-            self.assertEqual(result,{'version':'18.168.6.1-34.el7'})
+            self.assertEqual(result, {'version': '18.168.6.1-34.el7'})
 
 class GeneralTest(unittest.TestCase):
     def _is_solaris(self):

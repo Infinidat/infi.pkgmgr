@@ -9,26 +9,28 @@ The distributions currently supported are:
 Usage
 -----
 
-The first example, on ubuntu:
+On Ubuntu:
 ```python
 from infi.pkgmgr import UbuntuPackageManager
 pkgmgr = UbuntuPackageManager()
 name = 'sg3-utils'
-pkgmgr.install_package(name) if not pkgmgr.is_package_installed(name) else None
+if not pkgmgr.is_package_installed(name):
+    pkgmgr.install_package(name)
 ```
 
-Now, on redhat:
+On RedHat:
 ```python
 from infi.pkgmgr import RedHatPackageManager
 pkgmgr = RedHatPackageManager()
 name = 'sg3_utils'
-pkgmgr.install_package(name) if not pkgmgr.is_package_installed(name) else None
+if not pkgmgr.is_package_installed(name):
+    pkgmgr.install_package(name)
 ```
 
 Checking out the code
 =====================
 
-Run the following:
+To run this code from the repository for development purposes, run the following:
 
     easy_install -U infi.projector
     projector devenv build
