@@ -18,7 +18,7 @@ def get_distribution():  # pragma: no cover
     """:returns: bunch with the following keys: distname, version, id
     """
     from munch import Munch
-    from platform import linux_distribution
+    from distro import linux_distribution
     distname, version, _id = linux_distribution()
     # distname in ['Red Hat Enterprise Linux Server', 'Ubuntu']
     distname = ''.join(distname.split()[:2]).lower()
