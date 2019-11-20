@@ -19,9 +19,8 @@ def get_distribution():  # pragma: no cover
     """
     from munch import Munch
     from distro import linux_distribution
-    distname, version, _id = linux_distribution()
-    # distname in ['Red Hat Enterprise Linux Server', 'Ubuntu']
-    distname = ''.join(distname.split()[:2]).lower()
+    distname, version, _id = linux_distribution(full_distribution_name=False)
+    distname = distname.replace('rhel', 'redhat').replace('sles', 'suse')
     return Munch(distname=distname, version=version, id=_id.lower())
 
 class TestOnUbuntu(unittest.TestCase):
