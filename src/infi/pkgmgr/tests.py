@@ -6,26 +6,13 @@ from contextlib import contextmanager
 
 from infi import pkgmgr
 from mock import patch
+import distro
 # pylint: disable-all
 
 
-def get_platform_name():  # pragma: no cover
-    from platform import system
-    name = system().lower().replace('-', '_')
-    return name
-
-def get_distribution():  # pragma: no cover
-    """:returns: bunch with the following keys: distname, version, id
-    """
-    from munch import Munch
-    from distro import linux_distribution
-    distname, version, _id = linux_distribution(full_distribution_name=False)
-    distname = distname.replace('rhel', 'redhat').replace('sles', 'suse')
-    return Munch(distname=distname, version=version, id=_id.lower())
-
 class TestOnUbuntu(unittest.TestCase):
     def _running_on_ubuntu(self):
-        return get_platform_name() == "linux" and get_distribution().distname == "ubuntu"
+        return distro.id() == "ubuntu"
 
     def setUp(self):
         super(TestOnUbuntu, self).setUp()
@@ -60,16 +47,16 @@ class TestOnUbuntu(unittest.TestCase):
 
 
 class TestOnRedHat(unittest.TestCase):
-    def _running_on_ubuntu(self):
-        return get_platform_name() == "linux" and get_distribution().distname == "redhat"
+    def _running_on_redhat(self):
+        return distro.id() == "rhel"
 
     def setUp(self):
         super(TestOnRedHat, self).setUp()
         self._should_skip()
 
     def _should_skip(self):
-        if not self._running_on_ubuntu():
-            raise self.skipTest("This test runs only on ubuntu")
+        if not self._running_on_redhat():
+            raise self.skipTest("This test runs only on red hat")
         if not RootPermissions().is_root():
             raise self.skipTest("This test must run with root permissions")
 
