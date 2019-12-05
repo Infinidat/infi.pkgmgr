@@ -175,6 +175,7 @@ def get_package_manager():
     pkgmgr_dict = {
         'ubuntu': UbuntuPackageManager,
         'redhat': RedHatPackageManager,
+        'oracle': RedHatPackageManager,
         'centos': RedHatPackageManager,
         'suse': SusePackageManager,
         'solaris': SolarisPackageManager
