@@ -88,7 +88,7 @@ class UbuntuPackageManager(PackageManager):
             return ''
         else:
             import re
-            pattern = "^Version:\s+(?P<version>[a-zA-Z0-9\.\-\_\:]+)$"
+            pattern = "^Version:\s+(?P<version>[a-zA-Z0-9\.\-\_\:\+]+)$"
             output = dpkg_query.get_stdout().decode("ascii")
             match = re.search(pattern, output, re.MULTILINE)
             if match is None:
@@ -175,6 +175,7 @@ def get_package_manager():
     pkgmgr_dict = {
         'ubuntu': UbuntuPackageManager,
         'redhat': RedHatPackageManager,
+        'oracle': RedHatPackageManager,
         'centos': RedHatPackageManager,
         'suse': SusePackageManager,
         'solaris': SolarisPackageManager
