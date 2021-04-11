@@ -60,7 +60,8 @@ class RpmMixin(object):
 
 class UbuntuPackageManager(PackageManager):
     def install_package(self, package_name, specific_version=None):
-        cmd = "apt-get install -y {}".format(package_name)
+        cmd = "apt-get install -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold {}"
+        cmd = cmd.format(package_name)
         if specific_version:
             if self.get_installed_version(package_name)['version'] != specific_version:
                 self.remove_package(package_name)
