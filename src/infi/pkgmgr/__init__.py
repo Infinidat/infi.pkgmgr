@@ -178,6 +178,9 @@ def get_package_manager():
         'redhat': RedHatPackageManager,
         'oracle': RedHatPackageManager,
         'centos': RedHatPackageManager,
+        'rocky': RedHatPackageManager,
+        'almalinux': RedHatPackageManager,
+        'eurolinux': RedHatPackageManager,
         'suse': SusePackageManager,
         'solaris': SolarisPackageManager
     }
