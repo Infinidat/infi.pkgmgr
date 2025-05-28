@@ -175,6 +175,7 @@ def get_package_manager():
         platform_name = get_platform_string().split("-")[1]
     pkgmgr_dict = {
         'ubuntu': UbuntuPackageManager,
+        'debian': UbuntuPackageManager,
         'redhat': RedHatPackageManager,
         'oracle': RedHatPackageManager,
         'centos': RedHatPackageManager,
