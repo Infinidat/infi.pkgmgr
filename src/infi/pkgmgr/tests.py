@@ -258,7 +258,7 @@ class GeneralTest(unittest.TestCase):
 
     def test_get_package_manager(self):
         package_manager = pkgmgr.get_package_manager()
-        package_to_check = 'python'
+        package_to_check = 'bash'
         if self._is_solaris():
             package_to_check = 'CSW' + package_to_check
         self.assertTrue(package_manager.is_package_installed(package_to_check))
