@@ -58,7 +58,7 @@ class RpmMixin(object):
         raise RuntimeError("Couldn't get package version")
 
 
-class UbuntuPackageManager(PackageManager):
+class DebianPackageManager(PackageManager):
     def install_package(self, package_name, specific_version=None):
         cmd = "apt-get install -y -o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold {}"
         cmd = cmd.format(package_name)
@@ -104,6 +104,9 @@ class UbuntuPackageManager(PackageManager):
         cmd = "dpkg-query -s {}".format(package_name).split()
         dpkg_query = execute_command(cmd, check_returncode=False, timeout=QUERY_TIME)
         return {'version': self._extract_version_from_dpkg_query(dpkg_query)}
+
+class UbuntuPackageManager(DebianPackageManager):
+    pass
 
 class RedHatPackageManager(RpmMixin, PackageManager):
     def install_package(self, package_name):
@@ -175,6 +178,7 @@ def get_package_manager():
         platform_name = get_platform_string().split("-")[1]
     pkgmgr_dict = {
         'ubuntu': UbuntuPackageManager,
+        'debian': DebianPackageManager,
         'redhat': RedHatPackageManager,
         'oracle': RedHatPackageManager,
         'centos': RedHatPackageManager,
