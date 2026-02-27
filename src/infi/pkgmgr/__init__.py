@@ -1,17 +1,19 @@
 __import__("pkg_resources").declare_namespace(__name__)
 
 import logging  # pylint: disable=W0403
+import os
+
 logger = logging.getLogger()
 
 WAIT_TIME = 120
 QUERY_TIME = WAIT_TIME
 INSTALL_TIME = 300
+PKGINFO = os.path.join(os.path.sep, 'usr', 'bin', 'pkginfo')
 
 def execute_command(cmd, check_returncode=True, timeout=WAIT_TIME):  # pragma: no cover
     from infi.execute import execute
-    from os import environ
     logger.info("executing {}".format(cmd))
-    env = environ.copy()
+    env = os.environ.copy()
     env.pop('PYTHONPATH', 1)
     env['LC_ALL'] = 'en_US.UTF-8'
     process = execute(cmd, env=env)
@@ -138,7 +140,7 @@ class SolarisPackageManager(PackageManager):
         raise NotImplementedError
 
     def is_package_installed(self, package_name):
-        cmd = "pkginfo {}".format(package_name).split()
+        cmd = "{} {}".format(PKGINFO, package_name).split()
         info = execute_command(cmd, timeout=QUERY_TIME, check_returncode=False)
         output = info.get_stderr().decode("ascii")
         if info.get_returncode() == 0 and 'not found' not in output:
@@ -161,7 +163,7 @@ class SolarisPackageManager(PackageManager):
 
     def get_installed_version(self, package_name):
         """return dict of version and revision ( if exsist ) per pkg"""
-        cmd = "pkginfo -l {}".format(package_name).split()
+        cmd = "{} -l {}".format(PKGINFO, package_name).split()
         pkginfo = execute_command(cmd, timeout=QUERY_TIME)
         output = pkginfo.get_stdout().decode("ascii")
         return self._extract_version_from_pkginfo_output(output)
